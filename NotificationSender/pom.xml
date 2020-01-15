@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.gemicle.pcounter</groupId>
+		<artifactId>pcounter-MessagingParent</artifactId>
+		<version>2.21-SNAPSHOT</version>
+		<relativePath>../</relativePath>
+	</parent>
+	<artifactId>pcounter-Notificationsender</artifactId>
+	<packaging>jar</packaging>
+	<name>NotificationSender</name>
+	<properties>
+		<mailsettings>C:\PRJCTS\pcounter\pcounter\Server\MessagingParent\MailingSettings\target\pcounter-mailingservice-2.21-SNAPSHOT.jar</mailsettings>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-amqp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.logstash.logback</groupId>
+			<artifactId>logstash-logback-encoder</artifactId>
+			<version>${logstash.logback.encoder.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.firebase</groupId>
+			<artifactId>firebase-admin</artifactId>
+			<version>${firebase.version}</version>
+		</dependency>
+
+
+
+
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-integration</artifactId>
+
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.integration</groupId>
+			<artifactId>spring-integration-amqp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.gemicle.pcounter</groupId>
+			<artifactId>integration-graph</artifactId>
+			<version>0.0.1</version>
+			<scope>system</scope>
+			<systemPath>C:\PRJCTS\pcounter\pcounter\Server\integration-graph\target\integration-graph.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>com.gemicle.pcounter</groupId>
+			<artifactId>pcounter-Eventing</artifactId>
+			<version>${project.version}</version>
+			<scope>system</scope>
+			<systemPath>C:\PRJCTS\pcounter\pcounter\Server\Eventing\target\pcounter-Eventing-2.21-SNAPSHOT.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>com.gemicle.pcounter</groupId>
+			<artifactId>pcounter-EventsModule</artifactId>
+			<version>${project.version}</version>
+			<scope>system</scope>
+			<systemPath>C:\PRJCTS\pcounter\pcounter\Server\EventsModule\target\pcounter-EventsModule-2.21-SNAPSHOT.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>com.gemicle.pcounter</groupId>
+			<artifactId>pcounter-mailingservice</artifactId>
+			<version>${project.version}</version>
+			<scope>system</scope>
+			<systemPath>${mailsettings}</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>com.gemicle.pcounter</groupId>
+			<artifactId>pcounter-NotificationService</artifactId>
+			<version>${project.version}</version>
+			<scope>system</scope>
+			<systemPath>C:\PRJCTS\pcounter\pcounter\Server\MessagingParent\NotificationService\target\pcounter-NotificationService-2.21-SNAPSHOT.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>com.gemicle.pcounter</groupId>
+			<artifactId>messaging-sender</artifactId>
+			<version>${project.version}</version>
+			<scope>system</scope>
+			<systemPath>C:\PRJCTS\pcounter\pcounter\Server\MessagingParent\MessagingSender\target\messaging-sender-2.21-SNAPSHOT.jar</systemPath>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.gemicle.pcounter</groupId>
+			<artifactId>pcounter-MessagingCommon</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+			
+		</dependency>
+		<dependency>
+			<groupId>org.telegram</groupId>
+			<artifactId>telegrambots</artifactId>
+			<version>3.0</version>
+		</dependency>
+			
+		
+
+	</dependencies>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>Hoxton.SR1</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<build>
+		<finalName>${project.name}</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<includeSystemScope>true</includeSystemScope>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>com.gemicle.notificationsender.Application</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

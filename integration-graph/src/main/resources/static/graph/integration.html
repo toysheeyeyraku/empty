@@ -1,0 +1,257 @@
+<!-- Sorry, I'm neither javascript developer nor frontend   -->
+<html>
+<head>
+<title>Spring Integration Schema</title>
+<link rel="stylesheet" href="css/popups.css">
+<!-- Sets the basepath for the library if not in same directory -->
+<script type="text/javascript">
+	mxBasePath = '../src';
+</script>
+
+<!-- Loads and initializes the library -->
+<script type="text/javascript" src="../src/js/mxClient.js"></script>
+
+
+<!-- Example code -->
+<script type="text/javascript">
+	var structure;
+	function getStructure(url){
+	    var Httpreq = new XMLHttpRequest(); // a new request
+	    Httpreq.open("GET", url, false);
+	    Httpreq.send(null);
+	    return JSON.parse(Httpreq.responseText);          
+	}
+
+	// context element
+function mxVertexToolHandler(state)
+        {
+            mxVertexHandler.apply(this, arguments);
+        };
+
+        mxVertexToolHandler.prototype = new mxVertexHandler();
+        mxVertexToolHandler.prototype.constructor = mxVertexToolHandler;
+
+        mxVertexToolHandler.prototype.domNode = null;
+
+        mxVertexToolHandler.prototype.init = function()
+        {
+            mxVertexHandler.prototype.init.apply(this, arguments);
+            this.domNode = document.createElement('div');
+            this.domNode.className = 'popup';
+            this.domNode.style.position = 'absolute';
+            this.domNode.style.whiteSpace = 'nowrap';
+
+            this.domChildNode = document.createElement('div');
+            this.domChildNode.className = 'popuptext';
+            
+            //this.domChildNode.id = 'myPopup';
+            this.domChildNode.style.position = 'absolute';
+            this.domChildNode.style.whiteSpace = 'nowrap';
+            this.graph.container.appendChild(this.domNode);
+            var selectedNode = structure.nodes[this.state.cell.id - 2];
+            this.domChildNode.innerHTML += generateText(selectedNode); 
+            this.domChildNode.classList.toggle("show");
+            
+            this.domNode.appendChild(this.domChildNode);
+            this.redrawTools();
+        };
+
+        
+        mxVertexToolHandler.prototype.redraw = function()
+        {
+            mxVertexHandler.prototype.redraw.apply(this);
+            this.redrawTools();
+        };
+
+        mxVertexToolHandler.prototype.redrawTools = function()
+        {
+            if (this.state != null && this.domNode != null)
+            {
+                var dy = (mxClient.IS_VML && document.compatMode == 'CSS1Compat') ? 20 : 4;
+                this.domNode.style.left = (this.state.x + this.state.width - 56) + 'px';
+                this.domNode.style.top = (this.state.y + this.state.height + dy) + 'px';
+            }
+        };
+        
+        mxVertexToolHandler.prototype.destroy = function(sender, me)
+        {
+            mxVertexHandler.prototype.destroy.apply(this, arguments);
+
+            if (this.domNode != null)
+            {
+                this.domNode.parentNode.removeChild(this.domNode);
+                this.domNode = null;
+            }
+        };
+
+     function generateText(node){
+    	 var text = '';
+    	 text += '<b>'+node.name +'</b><br/>';
+    	 if(node.stats != null){
+	    	 for(var propName in node.stats) {
+	    		 text += propName +' : '+node.stats[propName]+'<br/>';
+    	}
+     }
+    	return text;
+     }
+	// Program starts here. Creates a sample graph in the
+	// DOM node with the specified ID. This function is invoked
+	// from the onLoad event handler of the document (see below).
+	function main(container) {
+		// Checks if browser is supported
+		if (!mxClient.isBrowserSupported()) {
+			// Displays an error message if the browser is
+			// not supported.
+			mxUtils.error('Browser is not supported!', 200, false);
+		} else {
+			// Creates the graph inside the given container
+			var graph = new mxGraph(container);
+			/* graph.setAutoSizeCells(true);
+			graph.setCellsResizable(true);
+			 */
+
+			// Disables basic selection and cell handling
+			//				graph.setEnabled(false);
+
+			// Changes the default vertex style in-place
+			var style = graph.getStylesheet().getDefaultVertexStyle();
+			style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_IMAGE;
+			//				style[mxConstants.STYLE_PERIMETER] = mxPerimeter.EllipsePerimeter;
+			//style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';
+			//style[mxConstants.STYLE_FONTSIZE] = '10';
+
+			// Updates the size of the container to match
+			// the size of the graph when it changes. If
+			// this is commented-out, and the DIV style's
+			// overflow is set to "auto", then scrollbars
+			// will appear for the diagram. If overflow is
+			// set to "visible", then the diagram will be
+			// visible even when outside the parent DIV.
+			// With the code below, the parent DIV will be
+			// resized to contain the complete graph.
+			//graph.setResizeContainer(true);
+
+			// Larger grid size yields cleaner layout result
+			graph.gridSize = 40;
+			
+			 graph.createHandler = function(state)
+             {
+                 if (state != null &&
+                     this.model.isVertex(state.cell))
+                 {
+                     return new mxVertexToolHandler(state);
+                 }
+
+                 return mxGraph.prototype.createHandler.apply(this, arguments);
+             };
+
+
+
+			// Gets the default parent for inserting new cells. This
+			// is normally the first child of the root (ie. layer 0).
+			var parent = graph.getDefaultParent();
+
+			// Creates a layout algorithm to be used
+			// with the graph
+			//var layout = new mxFastOrganicLayout(graph);
+			var layout = new mxHierarchicalLayout(graph,
+					mxConstants.DIRECTION_WEST);
+
+			// Moves stuff wider apart than usual
+			layout.forceConstant = 100;
+
+			// Reference to the transition checkbox
+			var animate = document.getElementById('animate');
+			structure = getStructure("/integration")
+
+			// Adds cells to the model in a single step
+			graph.getModel().beginUpdate();
+			try {
+				generateSchema(structure, graph);
+				// Executes the layout
+				layout.execute(parent);
+			} finally {
+				// Updates the display
+				graph.getModel().endUpdate();
+			}
+		}
+	};
+
+	function generateSchema(structure, graph) {
+		var graphNodes = [];
+		for (var i = 0; i < structure.nodes.length; i++) {
+			var node = structure.nodes[i];
+			var style = generateStyle(node);
+			var cell = graph.insertVertex(graph.getDefaultParent(), null, node.name, 20, 30 * i + 20, 100, 60, style);
+			
+            //var popup = graph.insertVertex(cell, null, 'World', 1, 1, 0, 0, 'fontColor=white;align=left;verticalAlign=top;labelBackgroundColor=black;labelBorderColor=black;fontSize=12;', true);
+          /*  var content = document.createElement('div');
+             var wnd = new mxWindow('Scrollable, resizable, auto height', content, 300, 50, 200, null, true, true);
+            wnd.setMaximizable(false);
+            wnd.setScrollable(true);
+            wnd.setResizable(true);
+            wnd.setVisible(true); */
+
+
+			graphNodes.push(cell); 
+		}
+		for (var i = 0; i < structure.links.length; i++) {
+			var linkItem = structure.links[i];
+			var from, to;
+			//	if(linkItem.type == "output"){
+			from = graphNodes[linkItem.from - 1];
+			to = graphNodes[linkItem.to - 1];
+			graph.insertEdge(graph.getDefaultParent(), null, '', from, to);
+		}
+	}
+
+	function generateStyle(node) {
+		var shape = '';
+		var labelPosition = 'top';
+		var verticalAlign = 'bottom'
+		if(node.componentType == 'channel' || node.componentType == 'publish-subscribe-channel'){
+			shape = 'channel';
+			labelPosition = 'bottom';
+			verticalAlign = 'top'
+		}
+		if(node.componentType == 'transformer'){
+            shape = 'transformer';
+        }
+		if(node.componentType == 'enricher'){
+            shape = 'enricher';
+        }
+		if(node.componentType.endsWith('channel-adapter') || node.componentType.endsWith('andler') || node.componentType.endsWith('ctivator')){
+			shape = 'service-activator';
+		}
+		if(node.componentType == 'recipient-list-router'){
+            shape = 'router';
+        }
+		if(node.componentType == 'filter'){
+            shape = 'filter';
+        }
+		if(node.componentType == 'splitter'){
+            shape = 'splitter';
+        }
+		//style = 'strokeWidth=1;strokeColor=#000000;dashed=0;align=center;html=1;fontSize=12;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;verticalAlign=top;shape='+shape+';';
+		
+		style = 'strokeWidth=1;strokeColor=#000000;dashed=0;align=center;html=1;fontSize=12;verticalLabelPosition='+labelPosition+';labelBackgroundColor=#ffffff;verticalAlign='+verticalAlign+';image=eip_img/'+ shape+'.gif';
+		return style;
+		
+	}
+	
+</script>
+</head>
+
+<!-- Page passes the container for the graph to the program -->
+<body onload="main(document.getElementById('graphContainer'))">
+	<img />
+
+	<!-- Creates a container for the graph with a grid wallpaper. Make sure to define the position
+		and overflow attributes! See comments on the adding of the size-listener on line 54 ff!  -->
+	<!-- 	<div id="graphContainer" style="position: relative; overflow: auto; width: 1800px; height: 900px; background: url('editors/images/grid.gif');"> -->
+	<div id="graphContainer"
+		style="cursor: default; position: absolute; top: 0px; left: 0px; bottom: 0px; right: 0px; background: url('editors/images/grid.gif')">
+
+	</div>
+</body>
+</html>
